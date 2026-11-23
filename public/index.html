@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parsha Narayana — Portfolio</title>
+<meta name="description" content="Parsha Narayana — Endpoint management (SCCM, Microsoft Intune), Android apps and business websites.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top"><span class="mark">PN</span><span class="bname">Parsha <b>Narayana</b></span></a>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+    <button class="btn ghost" id="loginBtn">Login</button>
+    <button class="btn ghost hidden" id="adminBtn">Dashboard</button>
+    <button class="btn ghost hidden" id="logoutBtn">Logout</button>
+  </nav>
+</header>
+
+<!-- HERO SLIDER -->
+<section class="hero" id="top">
+  <div class="slides" id="slides"></div>
+  <button class="arrow left" id="prev" aria-label="Previous">&#10094;</button>
+  <button class="arrow right" id="next" aria-label="Next">&#10095;</button>
+  <div class="dots" id="dots"></div>
+</section>
+
+<section id="about" class="sec">
+  <div class="wrap two">
+    <div>
+      <p class="eyebrow">About me</p>
+      <h2>Making technology work for business.</h2>
+    </div>
+    <div>
+      <p>I'm <b>Parsha Narayana</b>, a Master's graduate in Computer Science. I manage and secure endpoints at scale with <b>SCCM</b> and <b>Microsoft Intune</b>, and I build <b>Android apps</b> and <b>websites</b> that solve real business needs.</p>
+      <div class="stats">
+        <div><span>M.Sc.</span>Computer Science</div>
+        <div><span>SCCM</span>&amp; Intune</div>
+        <div><span>Apps</span>&amp; Web</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="expertise" class="sec dark">
+  <div class="wrap">
+    <p class="eyebrow">Expertise</p>
+    <h2>What I do</h2>
+    <div class="cards">
+      <article class="card"><div class="ic">&#9881;</div><h3>Endpoint Management</h3><p>Device deployment, patching, software distribution and compliance using Microsoft SCCM and Microsoft Intune.</p></article>
+      <article class="card"><div class="ic">&#128241;</div><h3>Android App Development</h3><p>Custom Android applications built around the day-to-day workflows of a business.</p></article>
+      <article class="card"><div class="ic">&#127760;</div><h3>Website Development</h3><p>Fast, clean, responsive websites for businesses — from brand pages to internal tools.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="sec">
+  <div class="wrap">
+    <p class="eyebrow">Portfolio</p>
+    <h2>Projects</h2>
+    <div class="grid" id="grid"></div>
+    <p class="empty hidden" id="emptyMsg">Projects will appear here soon.</p>
+  </div>
+</section>
+
+<section id="contact" class="sec dark">
+  <div class="wrap center">
+    <p class="eyebrow">Contact</p>
+    <h2>Let's work together</h2>
+    <p>Support &amp; enquiries</p>
+    <a class="btn solid big" id="mailLink" href="mailto:itspvn4@gmail.com">itspvn4@gmail.com</a>
+  </div>
+</section>
+
+<footer>© <span id="yr"></span> Parsha Narayana. All rights reserved.</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal hidden" id="loginModal">
+  <form class="box" id="loginForm">
+    <h3>Admin login</h3>
+    <input id="uid" placeholder="User ID" autocomplete="username" required>
+    <input id="pwd" type="password" placeholder="Password" autocomplete="current-password" required>
+    <p class="err" id="loginErr"></p>
+    <div class="row"><button type="button" class="btn ghost dk" data-close>Cancel</button><button class="btn solid">Login</button></div>
+  </form>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="modal hidden" id="adminModal">
+  <div class="box wide">
+    <div class="row between"><h3>Project dashboard</h3><button class="x" data-close>&times;</button></div>
+
+    <form id="projForm">
+      <input type="hidden" id="pid">
+      <label>Project name<input id="pname" placeholder="e.g. Studio Project" required></label>
+      <label>Category
+        <select id="pcat"><option>Website</option><option>Android App</option><option>Endpoint Management</option><option>Other</option></select>
+      </label>
+      <label>Description<textarea id="pdesc" rows="3" placeholder="Short description"></textarea></label>
+      <label>Project photos
+        <input type="file" id="pfiles" accept="image/*" multiple>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+      <label class="chk"><input type="checkbox" id="pslide" checked> Show on main page slider</label>
+      <div class="row"><button type="button" class="btn ghost dk" id="resetForm">Clear</button><button class="btn solid" id="saveBtn">Save project</button></div>
+    </form>
+
+    <h4>Your projects</h4>
+    <div id="plist"></div>
+
+    <p class="note">Saved projects and photos go live on the website immediately.</p>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
