@@ -1,7 +1,4 @@
 // Cloudflare Pages Function: handles every /api/* request.
-// Bindings required:  DB (KV namespace)  ·  IMAGES (R2 bucket)
-// Secrets required:   ADMIN_USER · ADMIN_PASSWORD · SESSION_SECRET
-
 const enc = new TextEncoder();
 const MAX_IMG = 6 * 1024 * 1024;
 const TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
@@ -22,13 +19,23 @@ async function isAuthed(request, env) {
   return safeEq(sig, await hmac(env.SESSION_SECRET, exp));
 }
 
+function cleanAndroidLink(category, value) {
+  if (category !== "Android App") return "";
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:" || !/^([a-z0-9-]+\.)*(play\.google\.com|play\.google\.com\.store)$/.test(url.hostname)) return null;
+    return url.href.slice(0, 500);
+  } catch { return null; }
+}
+
 export async function onRequest({ request, env, params }) {
   const route = [].concat(params.route || []).join("/");
   const method = request.method;
 
   if (!env.SESSION_SECRET || !env.ADMIN_USER || !env.ADMIN_PASSWORD) return json({ error: "Server not configured" }, 500);
 
-  // ---- public ----
   if (route === "projects" && method === "GET") {
     return json((await env.DB.get("projects", "json")) || [], 200, { "cache-control": "public, max-age=30" });
   }
@@ -36,11 +43,7 @@ export async function onRequest({ request, env, params }) {
   if (route.startsWith("img/") && method === "GET") {
     const obj = await env.IMAGES.get(route.slice(4));
     if (!obj) return new Response("Not found", { status: 404 });
-    return new Response(obj.body, { headers: {
-      "content-type": obj.httpMetadata?.contentType || "image/jpeg",
-      "cache-control": "public, max-age=31536000, immutable",
-      "x-content-type-options": "nosniff"
-    } });
+    return new Response(obj.body, { headers: { "content-type": obj.httpMetadata?.contentType || "image/jpeg", "cache-control": "public, max-age=31536000, immutable", "x-content-type-options": "nosniff" } });
   }
 
   if (route === "login" && method === "POST") {
@@ -53,13 +56,9 @@ export async function onRequest({ request, env, params }) {
     return json({ ok: true }, 200, { "set-cookie": `session=${exp}.${await hmac(s, exp)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=43200` });
   }
 
-  if (route === "logout" && method === "POST") {
-    return json({ ok: true }, 200, { "set-cookie": "session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0" });
-  }
-
+  if (route === "logout" && method === "POST") return json({ ok: true }, 200, { "set-cookie": "session=; HttpHttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0" });
   if (route === "me" && method === "GET") return json({ admin: await isAuthed(request, env) });
 
-  // ---- admin only ----
   if (!(await isAuthed(request, env))) return json({ error: "Unauthorized" }, 401);
 
   if (route === "upload" && method === "POST") {
@@ -76,15 +75,23 @@ export async function onRequest({ request, env, params }) {
   if (route === "projects" && method === "PUT") {
     let list; try { list = await request.json(); } catch { return json({ error: "Bad request" }, 400); }
     if (!Array.isArray(list) || list.length > 200) return json({ error: "Invalid data" }, 400);
-    const clean = list.map(p => ({
-      id: String(p.id || crypto.randomUUID()).slice(0, 64),
-      name: String(p.name || "").slice(0, 120),
-      category: String(p.category || "Other").slice(0, 40),
-      description: String(p.description || "").slice(0, 1000),
-      slide: p.slide !== false,
-      photos: (Array.isArray(p.photos) ? p.photos : []).filter(u => /^\/api\/img\/[\w.-]+$/.test(u)).slice(0, 30)
-    }));
-    // delete photos that are no longer used
+
+    const clean = [];
+    for (const p of list) {
+      const category = String(p.category || "Other").slice(0, 40);
+      const androidLink = cleanAndroidLink(category, p.androidLink);
+      if (androidLink === null) return json({ error: "Enter a valid Google Play Store HTTPS link" }, 400);
+      clean.push({
+        id: String(p.id || crypto.randomUUID()).slice(0, 64),
+        name: String(p.name || "").slice(0, 120),
+        category,
+        androidLink,
+        description: String(p.description || "").slice(0, 1000),
+        slide: p.slide !== false,
+        photos: (Array.isArray(p.photos) ? p.photos : []).filter(u => /^\/api\/img\/[\w.-]+$/.test(u)).slice(0, 30)
+      });
+    }
+
     const old = (await env.DB.get("projects", "json")) || [];
     const keep = new Set(clean.flatMap(p => p.photos));
     for (const u of old.flatMap(p => p.photos || [])) if (!keep.has(u)) await env.IMAGES.delete(u.replace("/api/img/", ""));
