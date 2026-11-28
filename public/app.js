@@ -54,15 +54,18 @@
     $("grid").innerHTML = projects.map(p => `
       <article class="pcard" data-id="${esc(p.id)}">
         <div class="img" style="background-image:url('${esc(p.photos?.[0] || "")}')"></div>
-        <div class="b"><small>${esc(p.category)}</small><h3>${esc(p.name)}</h3><p>${esc(p.description || "")}</p></div>
+        <div class="b"><small>${esc(p.category)}</small><h3>${esc(p.name)}</h3><p>${esc(p.description || "")}</p>
+        ${p.category === "Android App" && p.androidLink ? `<a class="play-link" href="${esc(p.androidLink)}" target="_blank" rel="noopener noreferrer" data-no-view>View on Google Play</a>` : ""}
+        </div>
       </article>`).join("");
     $("emptyMsg").classList.toggle("hidden", projects.length > 0);
   }
   $("grid").onclick = e => {
+    if (e.target.closest("[data-no-view]")) return;
     const c = e.target.closest(".pcard"); if (!c) return;
     const p = projects.find(x => x.id === c.dataset.id); if (!p || !p.photos?.length) return;
     const m = document.createElement("div"); m.className = "modal viewer";
-    m.innerHTML = `<div class="box wide"><div class="row between"><h3>${esc(p.name)}</h3><button class="x">&times;</button></div>${p.photos.map(ph => `<img src="${esc(ph)}" alt="">`).join("")}<p>${esc(p.description || "")}</p></div>`;
+    m.innerHTML = `<div class="box wide"><div class="row between"><h3>${esc(p.name)}</h3><button class="x">&times;</button></div>${p.photos.map(ph => `<img src="${esc(ph)}" alt="">`).join("")}<p>${esc(p.description || "")}</p>${p.category === "Android App" && p.androidLink ? `<a class="btn solid" href="${esc(p.androidLink)}" target="_blank" rel="noopener noreferrer">View on Google Play</a>` : ""}</div>`;
     m.onclick = ev => { if (ev.target === m || ev.target.className === "x") m.remove(); };
     document.body.appendChild(m);
   };
@@ -91,6 +94,8 @@
   /* ---------- dashboard ---------- */
   const save = async () => { const r = await api("projects", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(projects) }); projects = r.projects; refresh(); drawList(); };
   function openAdmin() { clearForm(); drawList(); open("adminModal"); }
+  function updateAndroidField() { $("androidLinkWrap").classList.toggle("hidden", $("pcat").value !== "Android App"); }
+  $("pcat").onchange = updateAndroidField;
   function drawThumbs() { $("thumbs").innerHTML = pending.map((p, i) => `<div style="background-image:url('${esc(p)}')"><button type="button" data-i="${i}">&times;</button></div>`).join(""); }
   $("thumbs").onclick = e => { if (e.target.dataset.i) { pending.splice(+e.target.dataset.i, 1); drawThumbs(); } };
   $("pfiles").onchange = async e => {
@@ -106,12 +111,14 @@
     } catch (err) { alert(err.message); }
     $("saveBtn").disabled = false; $("saveBtn").textContent = old;
   };
-  function clearForm() { $("projForm").reset(); $("pid").value = ""; pending = []; drawThumbs(); $("saveBtn").textContent = "Save project"; }
+  function clearForm() { $("projForm").reset(); $("pid").value = ""; $("pandroidlink").value = ""; pending = []; drawThumbs(); updateAndroidField(); $("saveBtn").textContent = "Save project"; }
   $("resetForm").onclick = clearForm;
   $("projForm").onsubmit = async e => {
     e.preventDefault();
     const id = $("pid").value || ("p" + Date.now());
-    const rec = { id, name: $("pname").value.trim(), category: $("pcat").value, description: $("pdesc").value.trim(), photos: [...pending], slide: $("pslide").checked };
+    const category = $("pcat").value;
+    const androidLink = category === "Android App" ? $("pandroidlink").value.trim() : "";
+    const rec = { id, name: $("pname").value.trim(), category, androidLink, description: $("pdesc").value.trim(), photos: [...pending], slide: $("pslide").checked };
     const i = projects.findIndex(p => p.id === id);
     i >= 0 ? projects[i] = rec : projects.unshift(rec);
     try { await save(); clearForm(); } catch (err) { alert(err.message); }
@@ -125,8 +132,8 @@
     const ed = e.target.dataset.e, del = e.target.dataset.d;
     if (ed) {
       const p = projects.find(x => x.id === ed);
-      $("pid").value = p.id; $("pname").value = p.name; $("pcat").value = p.category; $("pdesc").value = p.description || "";
-      $("pslide").checked = p.slide !== false; pending = [...(p.photos || [])]; drawThumbs(); $("saveBtn").textContent = "Update project";
+      $("pid").value = p.id; $("pname").value = p.name; $("pcat").value = p.category; $("pandroidlink").value = p.androidLink || ""; $("pdesc").value = p.description || "";
+      $("pslide").checked = p.slide !== false; pending = [...(p.photos || [])]; updateAndroidField(); drawThumbs(); $("saveBtn").textContent = "Update project";
       $("projForm").scrollIntoView({ behavior: "smooth" });
     }
     if (del && confirm("Delete this project?")) { projects = projects.filter(x => x.id !== del); try { await save(); } catch (err) { alert(err.message); } }
