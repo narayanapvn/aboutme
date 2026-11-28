@@ -26,14 +26,22 @@
   /* ---------- hero slider ---------- */
   let idx = 0, timer;
   function buildSlides() {
-    const slides = [{ intro: true, tag: S.education, title: `Hi, I'm <em>${esc(S.name)}</em>`, text: "Endpoint management with SCCM &amp; Microsoft Intune. Android apps and websites built for business.", cta: ["#projects", "View my work"] }];
-    projects.filter(p => p.slide !== false && p.photos?.length).forEach(p => p.photos.slice(0, 4).forEach(ph =>
-      slides.push({ img: ph, tag: p.category, title: esc(p.name), text: esc(p.description || ""), cta: ["#projects", "See all projects"] })));
-    slides.push({ intro: true, tag: "Expertise", title: "Secure. <em>Managed.</em> Connected.", text: "SCCM · Microsoft Intune · Android · Web", cta: ["#contact", "Get in touch"] });
+    const slides = [];
+    projects.filter(p => p.slide !== false && p.photos?.length).forEach(p =>
+      p.photos.slice(0, 4).forEach(ph => slides.push({ img: ph, title: esc(p.name) }))
+    );
+
+    if (!slides.length) {
+      $("slides").innerHTML = "";
+      $("dots").innerHTML = "";
+      clearInterval(timer);
+      return;
+    }
+
     $("slides").innerHTML = slides.map((s, i) => `
-      <div class="slide ${s.intro ? "intro" : ""} ${i === 0 ? "on" : ""}" ${s.img ? `style="background-image:url('${esc(s.img)}')"` : ""}>
-        <div class="txt"><span class="tag">${esc(s.tag || "")}</span><h1>${s.title}</h1><p>${s.text}</p>
-        <a class="btn solid" href="${s.cta[0]}">${s.cta[1]}</a></div></div>`).join("");
+      <div class="slide ${i === 0 ? "on" : ""}" style="background-image:url('${esc(s.img)}')">
+        <div class="txt"><h1>${s.title}</h1></div>
+      </div>`).join("");
     $("dots").innerHTML = slides.map((_, i) => `<i class="${i === 0 ? "on" : ""}" data-i="${i}"></i>`).join("");
     idx = 0; auto();
   }
@@ -111,10 +119,10 @@
     } catch (err) { alert(err.message); }
     $("saveBtn").disabled = false; $("saveBtn").textContent = old;
   };
-  function clearForm() { $("projForm").reset(); $("pid").value = ""; $("pandroidlink").value = ""; pending = []; drawThumbs(); updateAndroidField(); $("saveBtn").textContent = "Save project"; }
+  function clearForm() { $("projForm").reset(); $("pid").value = ""; $("androidLink").value = ""; pending = []; drawThumbs(); updateAndroidField(); $("saveBtn").textContent = "Save project"; }
   $("resetForm").onclick = clearForm;
   $("projForm").onsubmit = async e => {
-    e.preventDefault();
+    e.preventEventDefault();
     const id = $("pid").value || ("p" + Date.now());
     const category = $("pcat").value;
     const androidLink = category === "Android App" ? $("pandroidlink").value.trim() : "";
