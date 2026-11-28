@@ -32,10 +32,7 @@
 
 <section id="about" class="sec">
   <div class="wrap two">
-    <div>
-      <p class="eyebrow">About me</p>
-      <h2>Making technology work for business.</h2>
-    </div>
+    <div><p class="eyebrow">About me</p><h2>Making technology work for business.</h2></div>
     <div>
       <p>I'm <b>Parsha Narayana</b>, a Master's graduate in Computer Science. I manage and secure endpoints at scale with <b>SCCM</b> and <b>Microsoft Intune</b>, and I build <b>Android apps</b> and <b>websites</b> that solve real business needs.</p>
       <div class="stats">
@@ -49,8 +46,7 @@
 
 <section id="expertise" class="sec dark">
   <div class="wrap">
-    <p class="eyebrow">Expertise</p>
-    <h2>What I do</h2>
+    <p class="eyebrow">Expertise</p><h2>What I do</h2>
     <div class="cards">
       <article class="card"><div class="ic">&#9881;</div><h3>Endpoint Management</h3><p>Device deployment, patching, software distribution and compliance using Microsoft SCCM and Microsoft Intune.</p></article>
       <article class="card"><div class="ic">&#128241;</div><h3>Android App Development</h3><p>Custom Android applications built around the day-to-day workflows of a business.</p></article>
@@ -60,21 +56,11 @@
 </section>
 
 <section id="projects" class="sec">
-  <div class="wrap">
-    <p class="eyebrow">Portfolio</p>
-    <h2>Projects</h2>
-    <div class="grid" id="grid"></div>
-    <p class="empty hidden" id="emptyMsg">Projects will appear here soon.</p>
-  </div>
+  <div class="wrap"><p class="eyebrow">Portfolio</p><h2>Projects</h2><div class="grid" id="grid"></div><p class="empty hidden" id="emptyMsg">Projects will appear here soon.</p></div>
 </section>
 
 <section id="contact" class="sec dark">
-  <div class="wrap center">
-    <p class="eyebrow">Contact</p>
-    <h2>Let's work together</h2>
-    <p>Support &amp; enquiries</p>
-    <a class="btn solid big" id="mailLink" href="mailto:itspvn4@gmail.com">itspvn4@gmail.com</a>
-  </div>
+  <div class="wrap center"><p class="eyebrow">Contact</p><h2>Let's work together</h2><p>Support &amp; enquiries</p><a class="btn solid big" id="mailLink" href="mailto:itspvn4@gmail.com">itspvn4@gmail.com</a></div>
 </section>
 
 <footer>© <span id="yr"></span> Parsha Narayana. All rights reserved.</footer>
@@ -101,10 +87,11 @@
       <label>Category
         <select id="pcat"><option>Website</option><option>Android App</option><option>Endpoint Management</option><option>Other</option></select>
       </label>
-      <label>Description<textarea id="pdesc" rows="3" placeholder="Short description"></textarea></label>
-      <label>Project photos
-        <input type="file" id="pfiles" accept="image/*" multiple>
+      <label id="androidLinkWrap" class="hidden">Google Play Store link
+        <input id="pandroidlink" type="url" placeholder="https://play.google.com/store/apps/details?id=...">
       </label>
+      <label>Description<textarea id="pdesc" rows="3" placeholder="Short description"></textarea></label>
+      <label>Project photos<input type="file" id="pfiles" accept="image/*" multiple></label>
       <div class="thumbs" id="thumbs"></div>
       <label class="chk"><input type="checkbox" id="pslide" checked> Show on main page slider</label>
       <div class="row"><button type="button" class="btn ghost dk" id="resetForm">Clear</button><button class="btn solid" id="saveBtn">Save project</button></div>
@@ -112,7 +99,6 @@
 
     <h4>Your projects</h4>
     <div id="plist"></div>
-
     <p class="note">Saved projects and photos go live on the website immediately.</p>
   </div>
 </div>
